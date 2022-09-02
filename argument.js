@@ -1,0 +1,6 @@
+module.exports = [
+    "Comp", "COMP", 10000,
+    // "Chainlink", "LINK", 1000000,
+    // "Dai", "DAI", 10000000000,
+    // ['0x98d27a5A5E21b1D82D03241bF85F78c6bDd22e38', '0x5C2a14512D57136fdF36FE3574672B4c13D106D8', '0xAfD501BEd291Dc99D714bfa6aAE19fa69f9b1ab0'],
+];
