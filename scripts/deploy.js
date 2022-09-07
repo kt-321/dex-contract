@@ -23,6 +23,10 @@ async function main() {
     const Dex = await ethers.getContractFactory("Dex");
     const dex = await Dex.deploy([dai.address, link.address, comp.address]);
     console.log("Token address:", dex.address);
+
+    await dai.transfer(dex.address, 10000000000);
+    await link.transfer(dex.address, 1000000);
+    await comp.transfer(dex.address, 10000);
 }
 
 main()
