@@ -21,7 +21,7 @@ async function main() {
     console.log("Token address:", comp.address);
 
     const Dex = await ethers.getContractFactory("Dex");
-    const dex = await Dex.deploy([dai.address, link.address, comp.address]);
+    const dex = await Dex.deploy([dai.address, link.address, comp.address], ['0x773616e4d11a78f511299002da57a0a94577f1f4', '0xdc530d9457755926550b59e8eccdae7624181557', '0x1b39ee86ec5979ba5c322b826b3ecb8c79991699']);
     console.log("Token address:", dex.address);
 
     await dai.transfer(dex.address, 10000000000);

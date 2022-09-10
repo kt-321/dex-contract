@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 require("@nomiclabs/hardhat-etherscan");
+require("@nomiclabs/hardhat-waffle")
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -8,8 +9,9 @@ module.exports = {
   networks: {
     hardhat: {
       accounts: {
-        count: 50
-      }
+        count: 10,
+      },
+      // gas: "auto"
     },
     rinkeby: {
       url:"https://rinkeby.infura.io/v3/" + process.env.INFURA_KEY,
