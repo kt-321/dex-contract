@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat");
 const { string } = require("hardhat/internal/core/params/argumentTypes");
-const web3 = require("web3");
+const web3 = require("@nomiclabs/hardhat-web3");
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -21,8 +21,12 @@ async function main() {
     console.log("Token address:", comp.address);
 
     const Dex = await ethers.getContractFactory("Dex");
-    const dex = await Dex.deploy([dai.address, link.address, comp.address]);
+    // ether
+    const dex = await Dex.deploy([dai.address, link.address, comp.address], ['0x773616e4d11a78f511299002da57a0a94577f1f4', '0xdc530d9457755926550b59e8eccdae7624181557', '0x1b39ee86ec5979ba5c322b826b3ecb8c79991699']);
     console.log("Token address:", dex.address);
+    await dai.transfer(dex.address, 10000000000);
+    await link.transfer(dex.address, 1000000);
+    await comp.transfer(dex.address, 10000);
 }
 
 main()
