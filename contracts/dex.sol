@@ -3,8 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "./MyToken.sol";
-import "hardhat/console.sol";
+import "./myToken.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Dex {
@@ -22,7 +21,6 @@ contract Dex {
     }
 
     function setPriceFeed(address _tokenAddr) private {
-        console.log(_tokenAddr);
         feed = AggregatorV3Interface(supportedTokenAddr[_tokenAddr]);
     }
 
@@ -33,69 +31,48 @@ contract Dex {
     }
 
     function getLatestPrice() public view returns (int) {
-        // function getLatestPrice(address _tokenAddress) public view returns (int) {
         ( , int price, , , ) = feed.latestRoundData();
-
-        console.log(uint(price));
-        return price / 1e8;
+        return price;
     }
 
-    function getPrice(address _tokenAddr) public returns (int) {
+    function getPrice(address _tokenAddr) private returns (int) {
         setPriceFeed(_tokenAddr);
         return getLatestPrice();
     }
 
 
-    // function buyToken(address _tokenAddr, uint256 _cost, uint256 _amount) external payable supportsToken(_tokenAddr){
     function buyToken(address _tokenAddr, uint256 _cost) external payable supportsToken(_tokenAddr){
         ERC20 token = ERC20(_tokenAddr);
 
-        console.log("msg.value", msg.value);
-        console.log("_cost", _cost);
-
         // eth
         require(msg.value == _cost, "Insufficient fund");
-        
-        // int price = 1000000;
+
         uint price = uint(getPrice(_tokenAddr));
-
         // _cost / price
-        // uint256 amount = (_cost / price) - (_cost % price);
-        // uint256 amount = (_cost / price) * 0.95;
-        uint256 amount = (_cost / price * 19 / 20) - (_cost / price * 19 % 20);
-
-        console.log("amount:", amount);
-        console.log("balance:", token.balanceOf(address(this)));
+        uint256 amount = _cost / price;
 
         // erc20 token
         require(token.balanceOf(address(this)) >= amount, "Token sold out");
 
         token.transfer(msg.sender, amount);
-
         emit buy(msg.sender, _tokenAddr, _cost, amount);
     }
     
-    // function sellToken(address _tokenAddr, uint256 _cost, uint256 _amount) external payable {
-    function sellToken(address _tokenAddr, uint256 _cost) external payable {
+    function sellToken(address _tokenAddr, uint256 _amount) external supportsToken(_tokenAddr) {
         ERC20 token = ERC20(_tokenAddr);
         // erc20 token
-        require(token.balanceOf(msg.sender) >= _cost, "Insufficient token balance");
+        require(token.balanceOf(msg.sender) >= _amount, "Insufficient token balance");
 
-        // TODO
-        uint price = uint(getLatestPrice());
-        // _cost / price
-        // uint256 amount = (_cost / price) - (_cost % price);
-        uint256 amount = (_cost / price * 19 / 20) - (_cost / price * 19 % 20);
+        uint price = uint(getPrice(_tokenAddr));
+        uint256 cost = _amount * price;
 
-        console.log("amount:", amount);
-        console.log("balance:", token.balanceOf(address(this)));
+        require(address(this).balance >= cost, "Dex does not have enough funds");
 
-        require(address(this).balance >= amount, "Dex does not have enough funds");
+        token.transferFrom(msg.sender, address(this), _amount);
 
-        token.transferFrom(msg.sender, address(this), _cost);
-        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        (bool success, ) = payable(msg.sender).call{value: cost}("");
         require(success, "ETH transfer failed");
 
-        emit sell(msg.sender, _tokenAddr, _cost, amount);
+        emit sell(msg.sender, _tokenAddr, cost, _amount);
     }
 }
